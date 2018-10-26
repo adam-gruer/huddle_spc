@@ -92,7 +92,46 @@ categories <- pmap_dfr(list(start = cat_start,
                     value == "R" ~ "-1",
                     value == "-" ~ NA_character_,
                     TRUE ~ value)) %>%
-   mutate(value = as.numeric(value))
+   mutate(value = as.numeric(value)) 
+ 
+ #replace ed 4 hour stay greater than 1 with proportion
+huddle_data <- 
+  huddle_data %>%
+   mutate(value = if_else(kpi == "ED STAY 4 HOUR TARGET" & value > 1,
+                          value / 100, value))
+
  
 ```
 
+
+```{r ed presentations}
+huddle_data %>%
+  filter(kpi == "ED PRESENTATIONS") %>%
+  filter(!is.na(value)) %>%
+ tail(150) %>%
+  qic(x = seq_along( date),
+      y = value,
+      data = .,
+      chart = "c",
+      title = "SPC 'C' Chart of ED Presentations past 150 week days")
+
+  #ggplot(aes(value)) +
+  #geom_histogram(binwidth = 25)
+```
+
+```{r ed 4 hour stay}
+huddle_data %>%
+  filter(kpi == "ED STAY 4 HOUR TARGET") %>%
+  filter(!is.na(value)) %>%
+
+ # ggplot(aes(value)) +
+  #geom_histogram(binwidth = 0.05)
+ tail(100) %>%
+  qic(x = seq_along( date),
+      y = value,
+      data = .,
+      chart = "i",
+      title = "SPC 'I' Chart of ED Four Hour Stay % past 150 week days")
+
+  
+```
