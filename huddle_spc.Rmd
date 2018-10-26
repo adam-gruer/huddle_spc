@@ -26,6 +26,7 @@ huddle_data_raw <- read_xlsx("data/Copy of TABLE_HUDDLE DATA - SCREEN 01.xlsx",
 ```
 
 ```{r wrangle data}
+#wide to long clean up dates-----------
 huddle_data <- huddle_data_raw %>%
                 select(-X__2) %>%
                 rename(kpi = X__1) %>%
@@ -45,9 +46,9 @@ huddle_data <- huddle_data_raw %>%
 #4 convert number to string excle start counting form 1899/12/30
 #5 one of the date columns in the original spreadsheet had 1_aug harcoded 
 
-```
 
-```{r}
+
+#map kpis to categories and remove categpry header rows----------
 #indexes of categoriy row headers on one day
 cat_start <- 
 huddle_data %>% filter(date == as.Date("2018/10/25")) %>%
@@ -81,14 +82,17 @@ categories <- pmap_dfr(list(start = cat_start,
  huddle_data <- huddle_data %>%
    left_join(lookup) %>%
    filter(!kpi %in% category)
-      
- 
 
-
-
-
-
-  
+ #replace RAG codes with numeric representation------------
+ huddle_data <- 
+   huddle_data %>%
+   mutate(value = case_when(
+                    value == "G" ~ "1",
+                    value == "A" ~ "0",
+                    value == "R" ~ "-1",
+                    value == "-" ~ NA_character_,
+                    TRUE ~ value)) %>%
+   mutate(value = as.numeric(value))
  
 ```
 
