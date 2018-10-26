@@ -48,8 +48,15 @@ huddle_data <- huddle_data_raw %>%
 ```
 
 ```{r}
+cat_headers <- 
 huddle_data %>% filter(date == as.Date("2018/10/25")) %>%
-  mutate(value=case_when(value))
-  mutate(prev_val=lag(value))
+  pull(value) %>% 
+  is.na() %>%
+  which() 
+
+
+
+  
+ 
 ```
 
