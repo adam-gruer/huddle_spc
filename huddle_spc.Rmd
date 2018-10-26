@@ -10,14 +10,46 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r libraries}
+library(tidyverse)
+library(qicharts2)
+library(lubridate)
+library(readxl)
+
 
 ```
 
 ```{r getdata}
+huddle_data_raw <- read_xlsx("data/Copy of TABLE_HUDDLE DATA - SCREEN 01.xlsx",
+                             sheet = "2018-19")
+
 
 ```
 
 ```{r wrangle data}
+huddle_data <- huddle_data_raw %>%
+                select(-X__2) %>%
+                rename(kpi = X__1) %>%
+                gather(key="date", value="value", -kpi) %>%
+                mutate(date_original = date, #1
+                       date=stringr::str_remove(date,"__1"), #2
+                       date=as.numeric(date),#3
+                       date=as.Date(date,origin="1899/12/30"), #4 
+                       date=if_else(date_original=="1_Aug",as.Date("2018/08/01"),date)) %>% #5
+                filter(date < as.Date("2018/10/27"))
 
+
+
+#1 store orignal excel numeric date string
+#2 some strings had a trailing __1 , remove that part
+#3 convert excel date numeric string to a number
+#4 convert number to string excle start counting form 1899/12/30
+#5 one of the date columns in the original spreadsheet had 1_aug harcoded 
+
+```
+
+```{r}
+huddle_data %>% filter(date == as.Date("2018/10/25")) %>%
+  mutate(value=case_when(value))
+  mutate(prev_val=lag(value))
 ```
 
