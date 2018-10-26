@@ -48,11 +48,43 @@ huddle_data <- huddle_data_raw %>%
 ```
 
 ```{r}
-cat_headers <- 
+#indexes of categoriy row headers on one day
+cat_start <- 
 huddle_data %>% filter(date == as.Date("2018/10/25")) %>%
-  pull(value) %>% 
+  pull(value) %>%
   is.na() %>%
   which() 
+
+#end of range of rows for each category
+ cat_end <- lead(cat_start, default = 71) - 1
+ #category names
+ category <-  huddle_data[huddle_data$date== as.Date("2018/10/25") & is.na(huddle_data$value),1, drop = TRUE ]
+
+# map over the three vectors, for heach header create a dataframe of the rows it applies to
+ #row bind into a data frame
+categories <- pmap_dfr(list(start = cat_start,
+          end = cat_end,
+          categor = category),
+     function(start,end,category){
+
+        tibble(row = seq(start,end) ,
+               category = category)
+     })
+
+#create a lookup table between kpi and category
+  
+ lookup <- tibble(kpi= huddle_data[huddle_data$date== as.Date("2018/10/25") ,1 , drop = TRUE],
+                 category = categories[,2,drop = TRUE])
+ 
+ #join to huddle data on kpi and bring across the category
+ #filter out category headers
+ huddle_data <- huddle_data %>%
+   left_join(lookup) %>%
+   filter(!kpi %in% category)
+      
+ 
+
+
 
 
 
